@@ -1,0 +1,27 @@
+databases:
+  - name: trip-db
+    plan: free
+    databaseName: trips
+    user: trips
+
+services:
+  - type: web
+    name: trip-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/trips
+    envVars:
+      - key: APP_CORS_ORIGINS
+        sync: false # set to your Cloudflare Pages URL, e.g. https://trip-planner.pages.dev
+      - key: DB_HOST
+        fromDatabase: { name: trip-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: trip-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: trip-db, property: database }
+      - key: DB_USER
+        fromDatabase: { name: trip-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: trip-db, property: password }
