@@ -14,20 +14,50 @@ Estimate the cost of a trip and keep a record of its main expenses.
 4. Cost per traveller = total ÷ travellers (rounded to 2 decimals)
 5. List of saved trips with their expense summaries
 
+Plus: register / log in, trip details page with expense breakdown, edit and delete trips. Each user only sees their own trips.
+
 Validation (enforced on both client and server): days and travellers must be greater than 0, expenses cannot be negative.
+
+## Project structure
+
+```
+backend/src/main/java/com/travel/expense/
+├── controller/   AuthController, TripController (REST endpoints)
+├── service/      AuthService, TripService (business logic + cost calculation)
+├── model/        User, Trip (JPA entities)
+├── repository/   UserRepository, TripRepository
+├── dto/          request / response records with validation
+├── config/       WebConfig (CORS), AuthInterceptor (token check)
+└── exception/    ApiException, GlobalExceptionHandler
+
+frontend/src/
+├── App.jsx       login gate + tab switching
+├── pages/        AuthPage, TripsPage, AddTripPage, TripDetailsPage
+├── components/   Navbar, TripForm, TripCard, Field
+├── context/      AuthProvider (login state)
+├── api/          Axios client, auth and trip calls
+└── utils/        cost calculation, validation, formatting
+```
 
 ## API
 
-| Method | Path              | Description                           |
-|--------|-------------------|---------------------------------------|
-| POST   | `/api/trips`      | Save a trip, returns totals (201)     |
-| GET    | `/api/trips`      | List saved trips, newest first        |
-| DELETE | `/api/trips/{id}` | Delete a trip (204)                   |
+| Method | Path                 | Auth | Description                       |
+|--------|----------------------|------|-----------------------------------|
+| POST   | `/api/auth/register` | –    | Create account, returns token     |
+| POST   | `/api/auth/login`    | –    | Log in, returns token             |
+| POST   | `/api/auth/logout`   | ✓    | Invalidate token                  |
+| GET    | `/api/trips`         | ✓    | List your trips, newest first     |
+| POST   | `/api/trips`         | ✓    | Save a trip, returns totals (201) |
+| GET    | `/api/trips/{id}`    | ✓    | Trip details                      |
+| PUT    | `/api/trips/{id}`    | ✓    | Update a trip                     |
+| DELETE | `/api/trips/{id}`    | ✓    | Delete a trip (204)               |
+
+Authenticated requests send `Authorization: Bearer <token>`. Passwords are stored as BCrypt hashes.
 
 Invalid input returns `400` with a field → message map:
 
 ```json
-{ "message": "Validation failed", "errors": { "days": "Days must be greater than 0" } }
+{ "message": "Please fix the highlighted fields", "errors": { "days": "Days must be greater than 0" } }
 ```
 
 ## Run locally

@@ -2,9 +2,12 @@ package com.travel.expense.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
@@ -18,6 +21,10 @@ public class Trip {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
     private String destination;
@@ -44,19 +51,23 @@ public class Trip {
         // Required by JPA
     }
 
-    public Trip(String destination, int days, int travellers,
-                BigDecimal travelCost, BigDecimal accommodationCost, BigDecimal foodCost) {
+    public Trip(User user) {
+        this.user = user;
+    }
+
+    @PrePersist
+    void onCreate() {
+        createdAt = Instant.now();
+    }
+
+    public void update(String destination, int days, int travellers,
+                       BigDecimal travelCost, BigDecimal accommodationCost, BigDecimal foodCost) {
         this.destination = destination;
         this.days = days;
         this.travellers = travellers;
         this.travelCost = travelCost;
         this.accommodationCost = accommodationCost;
         this.foodCost = foodCost;
-    }
-
-    @PrePersist
-    void onCreate() {
-        createdAt = Instant.now();
     }
 
     public Long getId() {

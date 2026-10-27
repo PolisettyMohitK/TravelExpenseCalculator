@@ -1,11 +1,15 @@
 package com.travel.expense.repository;
 
 import com.travel.expense.model.Trip;
+import com.travel.expense.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TripRepository extends JpaRepository<Trip, Long> {
 
-    List<Trip> findAllByOrderByCreatedAtDesc();
+    List<Trip> findAllByUserOrderByCreatedAtDesc(User user);
+
+    Optional<Trip> findByIdAndUser(Long id, User user);
 }

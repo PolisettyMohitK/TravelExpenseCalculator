@@ -9,6 +9,36 @@ export const formatMoney = (value) => currency.format(Number(value) || 0)
 export const formatDate = (iso) =>
   new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 
+export const pluralize = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`
+
+export const EMPTY_TRIP = {
+  destination: '',
+  days: '',
+  travellers: '',
+  travelCost: '',
+  accommodationCost: '',
+  foodCost: '',
+}
+
+export const EXPENSES = [
+  { key: 'travelCost', label: 'Travel' },
+  { key: 'accommodationCost', label: 'Accommodation' },
+  { key: 'foodCost', label: 'Food' },
+]
+
+// Form inputs hold strings; convert a saved trip into form values and back
+export const toFormValues = (trip) =>
+  Object.fromEntries(Object.keys(EMPTY_TRIP).map((key) => [key, String(trip[key])]))
+
+export const toTripPayload = (form) => ({
+  destination: form.destination.trim(),
+  days: Number(form.days),
+  travellers: Number(form.travellers),
+  travelCost: Number(form.travelCost),
+  accommodationCost: Number(form.accommodationCost),
+  foodCost: Number(form.foodCost),
+})
+
 // Blank or invalid amounts count as 0 in the live preview
 const toAmount = (value) => Math.max(Number(value) || 0, 0)
 
@@ -34,13 +64,9 @@ export function validateTrip(form) {
     errors.travellers = 'Travellers must be greater than 0'
   }
 
-  for (const [field, label] of [
-    ['travelCost', 'Travel cost'],
-    ['accommodationCost', 'Accommodation cost'],
-    ['foodCost', 'Food cost'],
-  ]) {
-    if (form[field] === '') errors[field] = `${label} is required`
-    else if (Number(form[field]) < 0) errors[field] = `${label} cannot be negative`
+  for (const { key, label } of EXPENSES) {
+    if (form[key] === '') errors[key] = `${label} cost is required`
+    else if (Number(form[key]) < 0) errors[key] = `${label} cost cannot be negative`
   }
 
   return errors
